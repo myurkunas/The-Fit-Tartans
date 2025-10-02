@@ -1,106 +1,63 @@
 import streamlit as st
 import pandas as pd
+from cmu_scraper import scrape_groupx
+from eventbrite_scraper import scrape_eventbrite
+from google_calendar import get_calendar_events
+from combiner import combine_data
 
-# Import Python File Scripts
-import google_calendar
-import combiner
+st.set_page_config(page_title="Fit-Tartans Demo", layout="wide")
 
-# Fitness Class Scrapers
-try:
-    import eventbrite_scraper
-except ImportError:
-    eventbrite_scraper = None
+st.title("📅 Fit-Tartans Fitness Scheduler")
 
-# CMU GroupX scraper
-try:
-    import cmu_scraper
-except ImportError:
-    cmu_scraper = None
+# ------------------------
+# CMU GroupX Scraper
+# ------------------------
+st.header("Scrape CMU GroupX classes")
+headless = st.toggle("Run headless browser", value=True)
 
-st.title("CMU Student Fitness Scheduler")
+if st.button("Run GroupX Selenium scraper"):
+    with st.spinner("Scraping CMU GroupX classes..."):
+        groupx_df = scrape_groupx(headless=headless)
+        st.success("GroupX data is ready ✅")
+        st.dataframe(groupx_df)
 
-st.markdown(
-    "This app pulls your **Google Calendar** plus fitness events from **Eventbrite** and **CMU GroupX**, "
-    "then combines them into one schedule so you can see which classes fit your calendar."
-)
-
-# Store DataFrames in session state
-if "calendar_df" not in st.session_state:
-    st.session_state["calendar_df"] = None
-if "eventbrite_df" not in st.session_state:
-    st.session_state["eventbrite_df"] = None
-if "groupx_df" not in st.session_state:
-    st.session_state["groupx_df"] = None
-
-# -------------------------
-# Google Calendar
-# -------------------------
-st.header("Step 1: Fetch Google Calendar Events")
-if st.button("Fetch Google Calendar (next 14 days)"):
-    try:
-        cal_df = google_calendar.get_calendar_events()
-        st.session_state["calendar_df"] = cal_df
-        st.success("✅ Calendar events loaded")
-        st.dataframe(cal_df)
-    except Exception as e:
-        st.error(f"Error fetching calendar: {e}")
-
-# -------------------------
+# ------------------------
 # Eventbrite Scraper
-# -------------------------
-st.header("Step 2: Scrape Eventbrite Fitness Events")
-if eventbrite_scraper:
-    if st.button("Scrape Eventbrite"):
-        try:
-            eb_df = eventbrite_scraper.get_eventbrite_events()
-            st.session_state["eventbrite_df"] = eb_df
-            st.success("✅ Eventbrite events scraped")
-            st.dataframe(eb_df)
-        except Exception as e:
-            st.error(f"Error scraping Eventbrite: {e}")
-else:
-    st.info("⚠️ Eventbrite scraper not integrated as .py file. Please add eventbrite_scraper.py into your repo root.")
+# ------------------------
+st.header("Scrape Eventbrite fitness events")
 
-# -------------------------
-# GroupX Scraper
-# -------------------------
-st.header("Step 3: Scrape CMU GroupX Events")
-if cmu_scraper:
-    if st.button("Scrape GroupX"):
-        try:
-            gx_df = cmu_scraper.scrape_groupx(headless=True)   # <- changed here
-            st.session_state["groupx_df"] = gx_df
-            st.success("GroupX events scraped")
-            st.dataframe(gx_df)
-        except Exception as e:
-            st.error(f"Error scraping GroupX: {e}")
-else:
-    st.info("GroupX scraper not integrated as .py file yet.")
+if st.button("Run Eventbrite scraper now"):
+    with st.spinner("Scraping Eventbrite events..."):
+        eventbrite_df = scrape_eventbrite()
+        st.success("Eventbrite data is ready ✅")
+        st.dataframe(eventbrite_df)
 
-# -------------------------
+# ------------------------
+# Google Calendar
+# ------------------------
+st.header("Your Google Calendar events")
+
+if st.button("Load my Google Calendar"):
+    with st.spinner("Fetching your next 14 days of events..."):
+        calendar_df = get_calendar_events()
+        st.success("Calendar data is ready ✅")
+        st.dataframe(calendar_df)
+
+# ------------------------
 # Combine All
-# -------------------------
-st.header("Step 4: Combine All Events")
-if st.button("Combine"):
-    cal_df = st.session_state.get("calendar_df")
-    eb_df = st.session_state.get("eventbrite_df")
-    gx_df = st.session_state.get("groupx_df")
+# ------------------------
+st.header("Combine all schedules")
 
-    if cal_df is not None and eb_df is not None and gx_df is not None:
+if st.button("Combine my schedule"):
+    with st.spinner("Combining data sources..."):
         try:
-            final_df = combiner.standardize_and_combine(cal_df, eb_df, gx_df)
-            st.success("✅ Combined schedule created")
+            groupx_df = scrape_groupx(headless=True)
+            eventbrite_df = scrape_eventbrite()
+            calendar_df = get_calendar_events()
+
+            final_df = combine_data(groupx_df, eventbrite_df, calendar_df)
+            st.success("Combined schedule ready ✅")
             st.dataframe(final_df)
 
-            # Download option
-            csv = final_df.to_csv(index=False).encode("utf-8")
-            st.download_button(
-                "Download Combined CSV",
-                csv,
-                "combined_schedule.csv",
-                "text/csv"
-            )
         except Exception as e:
-            st.error(f"Error combining data: {e}")
-    else:
-        st.warning("⚠️ Please run all three steps first.")
+            st.error(f"Error combining schedules: {e}")
