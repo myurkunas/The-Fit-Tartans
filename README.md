@@ -1,6 +1,8 @@
 Run: streamlit run google_calendar.py --server.address=localhost
 
-Quick run (for mac terminal) -- assuming you have credentials.json downloaded & in the parent folder
+---
+
+**Quick run (for mac terminal) -- assuming you have credentials.json downloaded & in the parent folder**
 cd ~/The-Fit-Tartans
 
 source .venv/bin/activate
@@ -8,7 +10,7 @@ source .venv/bin/activate
 streamlit run streamlit_app.py
 
 
-Running after changes (for mac terminal):
+**Running after changes (for mac terminal):**
 cd ~/The-Fit-Tartans
 
 git pull origin main
