@@ -68,14 +68,14 @@ st.header("Step 3: Scrape CMU GroupX Events")
 if cmu_scraper:
     if st.button("Scrape GroupX"):
         try:
-            gx_df = cmu_scraper.get_groupx_events(headless=True)
+            gx_df = cmu_scraper.scrape_groupx(headless=True)   # <- changed here
             st.session_state["groupx_df"] = gx_df
-            st.success("✅ GroupX events scraped")
+            st.success("GroupX events scraped")
             st.dataframe(gx_df)
         except Exception as e:
             st.error(f"Error scraping GroupX: {e}")
 else:
-    st.info("⚠️ GroupX scraper not integrated as .py file yet.")
+    st.info("GroupX scraper not integrated as .py file yet.")
 
 # -------------------------
 # Combine All
