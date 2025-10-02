@@ -5,13 +5,13 @@ import pandas as pd
 import google_calendar
 import combiner
 
-# If you have eventbrite scraper as .py, import it. Otherwise leave placeholder.
+# Eventbrite scraper
 try:
     import eventbrite_scraper
 except ImportError:
     eventbrite_scraper = None
 
-# If you have CMU GroupX scraper as .py, import it. Otherwise leave placeholder.
+# CMU GroupX scraper
 try:
     import cmu_scraper
 except ImportError:
@@ -53,7 +53,7 @@ if eventbrite_scraper:
         except Exception as e:
             st.error(f"Error scraping Eventbrite: {e}")
 else:
-    st.info("⚠️ Eventbrite scraper not integrated as .py file. Please convert notebook first.")
+    st.info("⚠️ Eventbrite scraper not integrated as .py file. Please add eventbrite_scraper.py")
 
 # --- GroupX ---
 st.header("Step 3: Scrape CMU GroupX Events")
