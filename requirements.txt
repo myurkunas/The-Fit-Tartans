@@ -1,0 +1,8 @@
+streamlit
+pandas
+google-auth-oauthlib
+google-auth
+google-api-python-client
+beautifulsoup4
+selenium
+webdriver-manager
