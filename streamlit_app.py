@@ -12,9 +12,12 @@ import combiner
 
 # Eventbrite scraper
 try:
-    import eventbrite_scraper
-except ImportError:
+    import eventbrite_scraper  # must be a file named eventbrite_scraper.py in this folder
+    _EVENTBRITE_IMPORT_ERR = None
+except Exception as e:  # catch anything that goes wrong during import (missing deps, etc.)
     eventbrite_scraper = None
+    _EVENTBRITE_IMPORT_ERR = e
+
 
 # CMU GroupX scraper
 try:
@@ -57,21 +60,24 @@ if st.button("Fetch Google Calendar (next 14 days)"):
 
 # --- Eventbrite ---
 st.header("Step 2: Scrape Eventbrite Fitness Events")
-if eventbrite_scraper:
+if eventbrite_scraper is None:
+    st.info(f"⚠️ Eventbrite scraper couldn’t be loaded. "
+            f"Make sure eventbrite_scraper.py is in this folder and its deps are installed. "
+            f"Details: {_EVENTBRITE_IMPORT_ERR}")
+else:
     if st.button("Scrape Eventbrite"):
         try:
-            # Run the async Eventbrite scraper properly
+            # run async scraper
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
-            events = loop.run_until_complete(eventbrite_scraper.run())
+            events = loop.run_until_complete(eventbrite_scraper.run())  # your scraper’s async entrypoint
             eb_df = pd.DataFrame(events)
             st.session_state["eventbrite_df"] = eb_df
             st.success("✅ Eventbrite events scraped")
             st.dataframe(eb_df)
         except Exception as e:
             st.error(f"Error scraping Eventbrite: {e}")
-else:
-    st.info("⚠️ Eventbrite scraper not integrated as .py file. Please add eventbrite_scraper.py")
+
 
 
 # --- GroupX ---
