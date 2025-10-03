@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import asyncio
 
 # Import your existing scripts
 import google_calendar
@@ -17,10 +18,13 @@ try:
 except ImportError:
     cmu_scraper = None
 
+
 st.title("📅 Fit-Tartans Fitness Scheduler")
 
-st.markdown("This app pulls your **Google Calendar** plus fitness events from **Eventbrite** and **CMU GroupX**, "
-            "then combines them into one schedule so you can see which classes fit your calendar.")
+st.markdown(
+    "This app pulls your **Google Calendar** plus fitness events from **Eventbrite** "
+    "and **CMU GroupX**, then combines them into one schedule so you can see which classes fit your calendar."
+)
 
 # --- Session State ---
 if "calendar_df" not in st.session_state:
@@ -30,23 +34,33 @@ if "eventbrite_df" not in st.session_state:
 if "groupx_df" not in st.session_state:
     st.session_state["groupx_df"] = None
 
+
 # --- Google Calendar ---
 st.header("Step 1: Fetch Google Calendar Events")
 if st.button("Fetch Google Calendar (next 14 days)"):
     try:
-        cal_df = google_calendar.get_calendar_events()
-        st.session_state["calendar_df"] = cal_df
-        st.success("✅ Calendar events loaded")
-        st.dataframe(cal_df)
+        creds = google_calendar.get_google_credentials()
+        if creds:
+            cal_df = google_calendar.get_calendar_events(creds)
+            st.session_state["calendar_df"] = cal_df
+            st.success("✅ Calendar events loaded")
+            st.dataframe(cal_df)
+        else:
+            st.error("Google login failed. Please authorize the app.")
     except Exception as e:
         st.error(f"Error fetching calendar: {e}")
+
 
 # --- Eventbrite ---
 st.header("Step 2: Scrape Eventbrite Fitness Events")
 if eventbrite_scraper:
     if st.button("Scrape Eventbrite"):
         try:
-            eb_df = eventbrite_scraper.get_eventbrite_events()
+            # Run the async Eventbrite scraper properly
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            events = loop.run_until_complete(eventbrite_scraper.run())
+            eb_df = pd.DataFrame(events)
             st.session_state["eventbrite_df"] = eb_df
             st.success("✅ Eventbrite events scraped")
             st.dataframe(eb_df)
@@ -55,12 +69,15 @@ if eventbrite_scraper:
 else:
     st.info("⚠️ Eventbrite scraper not integrated as .py file. Please add eventbrite_scraper.py")
 
+
 # --- GroupX ---
 st.header("Step 3: Scrape CMU GroupX Events")
 if cmu_scraper:
     if st.button("Scrape GroupX"):
         try:
-            gx_df = cmu_scraper.get_groupx_events(headless=True)
+            scraper = cmu_scraper.CMUGroupXSeleniumScraper(headless=True)
+            classes_data = scraper.scrape_schedule_data()
+            gx_df = pd.DataFrame(classes_data)
             st.session_state["groupx_df"] = gx_df
             st.success("✅ GroupX events scraped")
             st.dataframe(gx_df)
@@ -68,6 +85,7 @@ if cmu_scraper:
             st.error(f"Error scraping GroupX: {e}")
 else:
     st.info("⚠️ GroupX scraper not integrated as .py file yet.")
+
 
 # --- Combine ---
 st.header("Step 4: Combine All Events")
