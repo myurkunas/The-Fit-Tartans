@@ -1,3 +1,7 @@
+# -------------------------
+# GPT 5 WAS USED FOR TROUBLESHOOTING
+# -------------------------
+
 import streamlit as st
 import pandas as pd
 
@@ -68,7 +72,7 @@ st.header("Step 3: Scrape CMU GroupX Events")
 if cmu_scraper:
     if st.button("Scrape GroupX"):
         try:
-            gx_df = cmu_scraper.scrape_groupx(headless=True)   # <- fixed function call
+            gx_df = cmu_scraper.get_groupx_events(headless=True)
             st.session_state["groupx_df"] = gx_df
             st.success("GroupX events scraped")
             st.dataframe(gx_df)
