@@ -79,14 +79,12 @@ st.header("Step 3: Scrape CMU GroupX Events")
 if cmu_scraper:
     if st.button("Scrape GroupX"):
         try:
-            gx_df = cmu_scraper.get_groupx_events(headless=True)
-=======
-            scraper = cmu_scraper.CMUGroupXSeleniumScraper(headless=True)
-            classes_data = scraper.scrape_schedule_data()
-            gx_df = pd.DataFrame(classes_data)
-            st.session_state["groupx_df"] = gx_df
-            st.success("✅ GroupX events scraped")
-            st.dataframe(gx_df)
+         scraper = cmu_scraper.CMUGroupXSeleniumScraper(headless=True)
+         classes_data = scraper.scrape_schedule_data()
+         gx_df = pd.DataFrame(classes_data)
+         st.session_state["groupx_df"] = gx_df
+         st.success("✅ GroupX events scraped")
+         st.dataframe(gx_df)
         except Exception as e:
             st.error(f"Error scraping GroupX: {e}")
 else:
