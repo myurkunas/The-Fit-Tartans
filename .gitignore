@@ -1,3 +1,4 @@
 # Ignore credentials
 credentials.json
 *.csv
+__pycache__
