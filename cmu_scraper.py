@@ -1,3 +1,34 @@
+"""
+CMU GroupX Class Scraper
+========================
+This script scrapes class schedule data from CMU's GroupX recreation portal.
+
+External Resources & Citations:
+-------------------------------
+1. Selenium WebDriver Documentation - Used for browser automation and hover simulation
+   https://www.selenium.dev/documentation/webdriver/
+   
+2. BeautifulSoup Documentation - Used for HTML parsing
+   https://www.crummy.com/software/BeautifulSoup/bs4/doc/
+   
+3. Pandas Documentation - Used for data structuring and CSV export
+   https://pandas.pydata.org/docs/
+   
+4. ChromeDriver Manager - Used for automatic ChromeDriver setup
+   https://github.com/SergeyPirogov/webdriver_manager
+   
+5. Stack Overflow - Referenced for handling stale element exceptions in Selenium
+   https://stackoverflow.com/questions/16166261/selenium-webdriver-how-to-resolve-stale-element-reference-exception
+   
+6. Selenium ActionChains for hover simulation - Referenced official documentation
+   https://www.selenium.dev/documentation/webdriver/actions_api/mouse/
+
+7. Claude AI (Anthropic) - Claude Sonnet 4.5 - Used for code development assistance, 
+   debugging support, and implementation guidance for web scraping techniques
+   https://claude.ai
+"""
+
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
